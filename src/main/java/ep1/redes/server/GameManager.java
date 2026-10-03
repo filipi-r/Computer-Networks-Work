@@ -1,6 +1,6 @@
 package server;
 
-import common.game.Position;
+import ep1.redes.common.game.Position;
 import java.util.List;
 
 public class GameManager {
