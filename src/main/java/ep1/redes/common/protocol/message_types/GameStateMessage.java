@@ -1,10 +1,10 @@
-package ep1.redes.common.protocol.message_types;
+package common.protocol.message_types;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ep1.redes.common.game.BoardView;
-import ep1.redes.common.game.TileType;
+import common.game.BoardView;
+import common.game.TileType;
 
 public record GameStateMessage(BoardView boardView) implements Message {
 

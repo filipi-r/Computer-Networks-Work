@@ -1,6 +1,6 @@
-package ep1.redes.common.protocol.message_types;
+package common.protocol.message_types;
 
-import ep1.redes.common.game.Direction;
+import common.game.Direction;
 
 public record MoveMessage(Direction dir) implements Message {
 

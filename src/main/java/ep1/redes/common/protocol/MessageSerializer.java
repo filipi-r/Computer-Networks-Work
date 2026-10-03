@@ -1,7 +1,7 @@
-package ep1.redes.common.protocol;
+package common.protocol;
 
-import ep1.redes.common.protocol.message_types.Message;
-import ep1.redes.common.protocol.message_types.MessageType;
+import common.protocol.message_types.Message;
+import common.protocol.message_types.MessageType;
 
 public class MessageSerializer {
 

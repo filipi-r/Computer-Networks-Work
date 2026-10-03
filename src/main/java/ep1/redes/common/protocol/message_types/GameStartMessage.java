@@ -1,6 +1,6 @@
-package ep1.redes.common.protocol.message_types;
+package common.protocol.message_types;
 
-import ep1.redes.common.game.Position;
+import common.game.Position;
 
 public record GameStartMessage(Position playerPosition) implements Message {
 

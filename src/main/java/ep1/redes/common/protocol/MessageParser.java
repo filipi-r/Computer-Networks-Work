@@ -1,23 +1,23 @@
-package ep1.redes.common.protocol;
+package common.protocol;
 
 import java.util.Arrays;
 
-import ep1.redes.common.game.BoardView;
-import ep1.redes.common.game.Direction;
-import ep1.redes.common.game.Position;
-import ep1.redes.common.game.TileType;
-import ep1.redes.common.protocol.message_types.ErrorMessage;
-import ep1.redes.common.protocol.message_types.GameOverMessage;
-import ep1.redes.common.protocol.message_types.GameStartMessage;
-import ep1.redes.common.protocol.message_types.GameStateMessage;
-import ep1.redes.common.protocol.message_types.JoinMessage;
-import ep1.redes.common.protocol.message_types.Message;
-import ep1.redes.common.protocol.message_types.MessageType;
-import ep1.redes.common.protocol.message_types.MoveMessage;
-import ep1.redes.common.protocol.message_types.MoveResultMessage;
-import ep1.redes.common.protocol.message_types.ShootMessage;
-import ep1.redes.common.protocol.message_types.ShootResultMessage;
-import ep1.redes.common.protocol.message_types.WaitingMessage;
+import common.game.BoardView;
+import common.game.Direction;
+import common.game.Position;
+import common.game.TileType;
+import common.protocol.message_types.ErrorMessage;
+import common.protocol.message_types.GameOverMessage;
+import common.protocol.message_types.GameStartMessage;
+import common.protocol.message_types.GameStateMessage;
+import common.protocol.message_types.JoinMessage;
+import common.protocol.message_types.Message;
+import common.protocol.message_types.MessageType;
+import common.protocol.message_types.MoveMessage;
+import common.protocol.message_types.MoveResultMessage;
+import common.protocol.message_types.ShootMessage;
+import common.protocol.message_types.ShootResultMessage;
+import common.protocol.message_types.WaitingMessage;
 
 public class MessageParser {
 

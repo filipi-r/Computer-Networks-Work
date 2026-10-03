@@ -1,4 +1,4 @@
-package ep1.redes.common.protocol.message_types;
+package common.protocol.message_types;
 
 public record ShootMessage(int x, int y) implements Message {
 
