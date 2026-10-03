@@ -1,3 +1,5 @@
+package ep1.redes.common.protocol.message_types;
+
 public enum MessageType {
 
     JOIN,
