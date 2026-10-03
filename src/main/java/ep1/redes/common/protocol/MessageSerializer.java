@@ -10,7 +10,6 @@ public class MessageSerializer {
         String[] data = message.data();
         StringBuilder serializedMessage = new StringBuilder(type.name());
         serializedMessage.append(",");
-
         for (String field : data) {
             serializedMessage.append(field);
             serializedMessage.append(",");

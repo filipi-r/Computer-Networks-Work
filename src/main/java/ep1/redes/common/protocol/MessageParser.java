@@ -1,5 +1,8 @@
 package ep1.redes.common.protocol;
 
+import java.util.Arrays;
+
+import ep1.redes.common.game.BoardView;
 import ep1.redes.common.game.Direction;
 import ep1.redes.common.game.Position;
 import ep1.redes.common.game.TileType;
@@ -30,6 +33,8 @@ public class MessageParser {
         String[] data = new String[dataLength];
         System.arraycopy(parts, 1, data, 0, dataLength);
 
+
+        //usei essa sintaxe para ficar mais curto, ficou até fofo
         return switch (type) {
             case JOIN -> new JoinMessage(data[0]);
             case WAITING -> new WaitingMessage();
@@ -58,13 +63,25 @@ public class MessageParser {
         int height = Integer.parseInt(data[3]);
         TileType[][] visibleTiles = new TileType[height][width];
 
-        int index = 4;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                visibleTiles[y][x] = TileType.valueOf(data[index++]);
-            }
+        for (TileType[] row : visibleTiles) {
+            Arrays.fill(row, TileType.FOG);
         }
 
-        return new GameStateMessage(playerPosition, visibleTiles);
+
+        /*ficou confuso então irei explicar:
+        O data é um array formado por trios, o primeiro indice do trio sinaliza a posição x
+        o segundo indice sinaliza a posição y
+        o terceiro sinaliza o valor da célula (x,y) (agua, névoa ou jogador);
+        por isso, o indice i pula de 3 em 3, ele vai sempre pro próximo trio
+
+        Isso foi feito para evitar enviar a matriz inteira na mensagem (eu me arrependi disso, talvez tenha ficado complicado sem motivo e nem tenha de fato ficado mais leve).
+        */
+        for (int i = 4; i < data.length; i += 3) {
+            int x = Integer.parseInt(data[i]);
+            int y = Integer.parseInt(data[i + 1]);
+            visibleTiles[y][x] = TileType.valueOf(data[i + 2]);
+        }
+
+        return new GameStateMessage(new BoardView(playerPosition, visibleTiles));
     }
 }

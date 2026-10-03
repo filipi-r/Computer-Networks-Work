@@ -1,33 +1,44 @@
 package ep1.redes.common.protocol.message_types;
 
-import ep1.redes.common.game.Position;
+import java.util.ArrayList;
+import java.util.List;
+
+import ep1.redes.common.game.BoardView;
 import ep1.redes.common.game.TileType;
 
-public record GameStateMessage(Position playerPosition, TileType[][] visibleTiles) implements Message {
+public record GameStateMessage(BoardView boardView) implements Message {
 
     @Override
     public MessageType type() {
         return MessageType.GAME_STATE;
     }
 
+    /*Transforma o array em trios com coordenadas x e y e o valor (agua ou jogador)
+     */
     @Override
     public String[] data() {
+        TileType[][] visibleTiles = boardView.visibleTiles();
+        var playerPosition = boardView.playerPosition();
         int height = visibleTiles.length;
-        int width = height == 0 ? 0 : visibleTiles[0].length;
-        String[] data = new String[4 + height * width];
+        int width = visibleTiles[0].length;
+        List<String> data = new ArrayList<>();
 
-        data[0] = String.valueOf(playerPosition.x());
-        data[1] = String.valueOf(playerPosition.y());
-        data[2] = String.valueOf(width);
-        data[3] = String.valueOf(height);
+        data.add(String.valueOf(playerPosition.x()));
+        data.add(String.valueOf(playerPosition.y()));
+        data.add(String.valueOf(width));
+        data.add(String.valueOf(height));
 
-        int index = 4;
-        for (TileType[] row : visibleTiles) {
-            for (TileType tile : row) {
-                data[index++] = tile.name();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                TileType tile = visibleTiles[y][x];
+                if (tile != TileType.FOG) {
+                    data.add(String.valueOf(x));
+                    data.add(String.valueOf(y));
+                    data.add(tile.name());
+                }
             }
         }
 
-        return data;
+        return data.toArray(new String[data.size()]);
     }
 }
