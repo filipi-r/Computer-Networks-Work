@@ -1,10 +1,10 @@
 package common.protocol.message_types;
 
-public record JoinMessage(String playerName) implements Message {
+public record ReadyMessage(String playerName) implements Message {
 
     @Override
     public MessageType type() {
-        return MessageType.JOIN;
+        return MessageType.READY;
     }
 
     @Override

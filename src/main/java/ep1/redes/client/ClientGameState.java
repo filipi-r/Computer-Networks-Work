@@ -1,26 +1,28 @@
 package client;
 
+import common.protocol.message_types.Message;
+
 public class ClientGameState {
-    public enum EstadoCliente {
-        CONECTADO,
-        AGUARDANDO_OK,
-        SELECAO_POSICAO,
-        EM_JOGO
+    public enum ClientState {
+        CONNECTING,
+        LOBBY_FULL,
+        RUNNING
     }
 
-    private EstadoCliente estadoAtual = EstadoCliente.CONECTADO;
+    private ClientState currentState = ClientState.CONNECTING;
 
-    public void atualizarEstado(String mensagemDoServidor) {
-        if (mensagemDoServidor.contains("LOBBY_FULL")) {
-            this.estadoAtual = EstadoCliente.AGUARDANDO_OK;
-        } else if (mensagemDoServidor.contains("SELECT_POSITION")) {
-            this.estadoAtual = EstadoCliente.SELECAO_POSICAO;
-        } else if (mensagemDoServidor.contains("GAME_START")) {
-            this.estadoAtual = EstadoCliente.EM_JOGO;
+    public ClientState getState() {
+        return currentState;
+    }
+
+    public void updateState(Message message) {
+        switch(message.type()) {
+            case LOBBY_FULL:
+                this.currentState = ClientState.LOBBY_FULL;
+            case GAME_START:
+                this.currentState = ClientState.RUNNING;
+            default:
+                break;
         }
-    }
-
-    public EstadoCliente getEstadoAtual() {
-        return estadoAtual;
     }
 }

@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import common.protocol.MessageParser;
+import common.protocol.MessageSerializer;
+import common.protocol.message_types.ConnectedMessage;
+
 public class GameSession {
 
     public enum EstadoSessao {
@@ -31,7 +35,7 @@ public class GameSession {
     public synchronized boolean adicionarJogador(ClientHandler client) {
         if (jogadores.size() < MAX_JOGADORES) {
             jogadores.add(client);
-            client.send("CONNECTED " + id + " Player " + jogadores.size());
+            client.send(MessageSerializer.serialize(new ConnectedMessage(id, jogadores.size())));
 
             if (isCheio()) {
                 estado = EstadoSessao.AGUARDANDO_OK;

@@ -7,10 +7,12 @@ import common.game.Direction;
 import common.game.Position;
 import common.game.TileType;
 import common.protocol.message_types.ErrorMessage;
+import common.protocol.message_types.ConnectedMessage;
 import common.protocol.message_types.GameOverMessage;
 import common.protocol.message_types.GameStartMessage;
 import common.protocol.message_types.GameStateMessage;
-import common.protocol.message_types.JoinMessage;
+import common.protocol.message_types.LobbyFullMessage;
+import common.protocol.message_types.ReadyMessage;
 import common.protocol.message_types.Message;
 import common.protocol.message_types.MessageType;
 import common.protocol.message_types.MoveMessage;
@@ -36,8 +38,10 @@ public class MessageParser {
 
         //usei essa sintaxe para ficar mais curto, ficou até fofo
         return switch (type) {
-            case JOIN -> new JoinMessage(data[0]);
+            case CONNECTED -> new ConnectedMessage(data[0], Integer.parseInt(data[1]));
+            case READY -> new ReadyMessage(data[0]);
             case WAITING -> new WaitingMessage();
+            case LOBBY_FULL -> new LobbyFullMessage();
             case GAME_START -> new GameStartMessage(position(data, 0));
             case MOVE -> new MoveMessage(Direction.valueOf(data[0]));
             case SHOOT -> new ShootMessage(Integer.parseInt(data[0]), Integer.parseInt(data[1]));
@@ -48,6 +52,7 @@ public class MessageParser {
             case GAME_STATE -> gameState(data);
             case GAME_OVER -> new GameOverMessage(data[0]);
             case ERROR -> new ErrorMessage(data[0]);
+            default -> new ErrorMessage("Mensagem Recebida é Invalida");
         };
     }
 
