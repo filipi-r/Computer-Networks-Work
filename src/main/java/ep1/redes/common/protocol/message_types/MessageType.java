@@ -2,6 +2,7 @@ package common.protocol.message_types;
 
 public enum MessageType {
 
+    JOIN,
     CONNECTED,
     WAITING,
     READY,

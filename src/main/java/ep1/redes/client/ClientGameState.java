@@ -19,8 +19,10 @@ public class ClientGameState {
         switch(message.type()) {
             case LOBBY_FULL:
                 this.currentState = ClientState.LOBBY_FULL;
+                break;
             case GAME_START:
                 this.currentState = ClientState.RUNNING;
+                break;
             default:
                 break;
         }

@@ -6,20 +6,7 @@ import common.game.BoardView;
 import common.game.Direction;
 import common.game.Position;
 import common.game.TileType;
-import common.protocol.message_types.ErrorMessage;
-import common.protocol.message_types.ConnectedMessage;
-import common.protocol.message_types.GameOverMessage;
-import common.protocol.message_types.GameStartMessage;
-import common.protocol.message_types.GameStateMessage;
-import common.protocol.message_types.LobbyFullMessage;
-import common.protocol.message_types.ReadyMessage;
-import common.protocol.message_types.Message;
-import common.protocol.message_types.MessageType;
-import common.protocol.message_types.MoveMessage;
-import common.protocol.message_types.MoveResultMessage;
-import common.protocol.message_types.ShootMessage;
-import common.protocol.message_types.ShootResultMessage;
-import common.protocol.message_types.WaitingMessage;
+import common.protocol.message_types.*;
 
 public class MessageParser {
 
@@ -38,8 +25,9 @@ public class MessageParser {
 
         //usei essa sintaxe para ficar mais curto, ficou até fofo
         return switch (type) {
+            case JOIN -> new JoinMessage(data[0]);
             case CONNECTED -> new ConnectedMessage(data[0], Integer.parseInt(data[1]));
-            case READY -> new ReadyMessage(data[0]);
+            case READY -> new ReadyMessage();
             case WAITING -> new WaitingMessage();
             case LOBBY_FULL -> new LobbyFullMessage();
             case GAME_START -> new GameStartMessage(position(data, 0));

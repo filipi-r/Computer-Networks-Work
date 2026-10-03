@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import client.ClientGameState.ClientState;
 import common.protocol.MessageSerializer;
+import common.protocol.message_types.JoinMessage;
 import common.protocol.message_types.Message;
 import common.protocol.message_types.ReadyMessage;
 
@@ -22,9 +23,8 @@ public class Client {
     private final PrintWriter out;
     private final String playerName;
     private final ClientGameState gameState;
-    TerminalUI terminal;
 
-    public Client(String playerName, TerminalUI terminal) throws IOException{
+    public Client(String playerName) throws IOException{
         this.socket = new Socket(SERVER_IP, SERVER_PORT);
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         this.out = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
@@ -37,6 +37,7 @@ public class Client {
     }
 
     public void start() {
+        send(new JoinMessage(playerName));
         ServerConnection server = new ServerConnection(in, this);
         Thread thread = new Thread(server);
         thread.start();
@@ -50,39 +51,37 @@ public class Client {
     }
 
     public void gameLoop() {
-        terminal.printHelp();
-        while (gameState.getState() == ClientState.RUNNING && terminal.hasNextLine()) {
-            String[] command = terminal.getPrompt();
+        TerminalUI.printHelp();
+        while ((gameState.getState() == ClientState.RUNNING || gameState.getState() == ClientState.LOBBY_FULL) && TerminalUI.hasNextLine()) {
+            String[] command = TerminalUI.getPrompt();
             if (command[0].isEmpty()) continue;
 
             switch (command[0].toLowerCase()) {
-                case "ok":
-                    handleOk();
-                    break;
+                
             }
         }
     }
 
-    private void handleOk() {
-        if (gameState.getState() != ClientState.LOBBY_FULL) {
-            System.out.println("Não há nada para confirmar agora.");
-            return;
+    public void ready() {
+        while(true) {
+            String[] readyCommand = TerminalUI.getPrompt();
+
+            if(readyCommand[0].toLowerCase().equals("ok")) break;
         }
 
-        send(new ReadyMessage(playerName));
+        send(new ReadyMessage());
         System.out.println("Confirmado! Aguardando o servidor iniciar a partida...");
     }
 
     public static void main(String[] args) throws IOException{
-        TerminalUI terminal = new TerminalUI();
 
-        System.out.println("Digite seu apelido:");
+        System.out.print("> Digite seu apelido: ");
         String name = new Scanner(System.in).nextLine().trim();
 
         //tirando virgulas pq o protocolo separa as coisas por virgula e deu merda
         name = name.replace(",", "").replace("\\", "");
         if (name.isEmpty()) name = "jogador";
 
-        new Client(name, terminal).start();
+        new Client(name).start();
     }
 }

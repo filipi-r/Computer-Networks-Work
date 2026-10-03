@@ -31,7 +31,7 @@ public record GameStateMessage(BoardView boardView) implements Message {
         for (int x = 0; x < height; x++) {
             for (int y = 0; y < width; y++) {
                 TileType tile = visibleTiles[x][y];
-                if (tile != TileType.FOG) {
+                if (tile != TileType.FOG && tile != null) {
                     data.add(String.valueOf(x));
                     data.add(String.valueOf(y));
                     data.add(tile.name());

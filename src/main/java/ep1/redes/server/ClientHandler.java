@@ -1,5 +1,9 @@
 package server;
 
+import common.protocol.MessageParser;
+import common.protocol.MessageSerializer;
+import common.protocol.message_types.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -13,6 +17,7 @@ public class ClientHandler implements Runnable {
 
     private GameSession gameSession;
     private boolean ready = false;
+    private String name = "Jogador"; // <-- VARIÁVEL ADICIONADA AQUI
 
     public ClientHandler(Socket socket, LobbyManager lobbyManager) throws IOException {
         this.socket = socket;
@@ -24,52 +29,66 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try (socket) {
-            lobbyManager.entrarNoLobby(this);
+            lobbyManager.enterLobby(this);
 
             while (input.hasNextLine()) {
-                String mensagem = input.nextLine();
-                processarMensagem(mensagem);
-            }
-        } catch (Exception e) {
-            System.out.println("[ClientHandler] Cliente desconectado.");
-        } finally {
-            if (gameSession != null) {
-                gameSession.removerJogador(this);
-            }
-        }
-    }
+                String rawMsg = input.nextLine();
+                if (rawMsg.isBlank()) continue;
 
-    private void processarMensagem(String msg) {
-        // FASE 1: Aguardando 'OK' de ambos no Lobby
-        if (msg.equalsIgnoreCase("OK")) {
-            if (!this.ready) {
-                this.ready = true;
-
-                // Dispara a checagem primeiro
-                gameSession.verificarProntidao();
-
-                // Só envia a mensagem de espera se AINDA NÃO tiver entrado na fase de seleção
-                if (!gameSession.isEmFaseSelecao()) {
-                    send("YOU_ARE_READY: Aguardando o outro jogador...");
+                try {
+                    Message message = MessageParser.parse(rawMsg);
+                    processarMensagem(message);
+                } catch (Exception e) {
+                    send(new ErrorMessage("Mensagem inválida ou malformada: " + e.getMessage()));
                 }
             }
-        }
-        // FASE 2: Ambos já deram 'OK' -> Escolha de Posição
-        else if (msg.startsWith("SELECT ") && gameSession.isEmFaseSelecao()) {
-            String[] partes = msg.split(" ");
-            int x = Integer.parseInt(partes[1]);
-            int y = Integer.parseInt(partes[2]);
-
-            gameSession.processarEscolhaPosicao(this, x, y);
-        }
-        // FASE 3: Partida em Andamento -> Movimentos e Ações
-        else if (msg.startsWith("MOVE ") && gameSession.isEmJogo()) {
-            gameSession.processarMovimento(this, msg);
+        } catch (Exception e) {
+            System.out.println("[ClientHandler] Cliente desconectado: " + name);
+        } finally {
+            if (gameSession != null) {
+                gameSession.removePlayer(this);
+            }
         }
     }
 
-    public void send(String msg) { output.println(msg); }
+    private void processarMensagem(Message msg) {
+        switch (msg.type()) {
+            case JOIN -> {
+                JoinMessage joinMsg = (JoinMessage) msg;
+                this.name = joinMsg.playerName();
+                System.out.println("[ClientHandler] Jogador nomeado: " + this.name);
+            }
+            case READY -> {
+                if (!this.ready) {
+                    this.ready = true;
+                    System.out.println("[ClientHandler] " + name + " está pronto");
+                    gameSession.checkReadiness();
+                }
+            }
+            case MOVE -> {
+                if (gameSession.isEmJogo()) {
+                    MoveMessage moveMsg = (MoveMessage) msg;
+                    gameSession.processMovement(this, moveMsg);
+                } else {
+                    send(new ErrorMessage("A partida ainda não começou!"));
+                }
+            }
+            case SHOOT -> {
+                if (gameSession.isEmJogo()) {
+                    ShootMessage shootMsg = (ShootMessage) msg;
+                    // Lógica para processar o tiro via GameManager
+                }
+            }
+            default -> send(new ErrorMessage("Comando não suportado no momento: " + msg.type()));
+        }
+    }
+
+    public void send(Message msg) {
+        output.println(MessageSerializer.serialize(msg));
+    }
+
     public boolean isReady() { return ready; }
+    public String getName() { return name; }
     public void setGameSession(GameSession session) { this.gameSession = session; }
     public GameSession getGameSession() { return gameSession; }
 }
