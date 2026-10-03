@@ -13,7 +13,7 @@ public class Client {
         try {
             Socket socket = new Socket(SERVER_IP, SERVER_PORT);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            Scanner teclado = new Scanner(System.in);
+            Scanner terminal = new Scanner(System.in);
 
             ClientGameState gameState = new ClientGameState();
             TerminalUI ui = new TerminalUI();
@@ -23,8 +23,8 @@ public class Client {
             new Thread(conexao).start();
 
             // 2. Loop principal da Thread MAIN: lê o teclado e envia pro servidor
-            while (teclado.hasNextLine()) {
-                String comando = teclado.nextLine();
+            while (terminal.hasNextLine()) {
+                String comando = terminal.nextLine();
                 out.println(comando); // Envia a String diretamente pelo Socket
             }
 
