@@ -1,4 +1,4 @@
-package ep1.redes.common.game;
+package common.game;
 
 public enum TileType {
     WATER,
