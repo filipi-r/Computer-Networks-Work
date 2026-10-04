@@ -72,10 +72,8 @@ public class GameManager {
 
             session.sendAll(new GameOverMessage(winnerIdx, winnerName));
             session.finishGame();
-        } else if (game.round() != roundBefore) {
-            sendRounds();
         } else {
-            sendRound(actor);
+            sendRounds();
         }
     }
 
