@@ -126,6 +126,12 @@ public class Game {
         for (Position cell : me.visibility().revealedCells()) {
             board.set(cell, TileType.WATER);
         }
+
+        // revelado pelo inimigo tb é visivel
+        for (Position cell : enemy.visibility().revealedCells()) {
+            board.set(cell, TileType.WATER);
+        }
+
         if (me.visibility().isRevealed(enemy.position())) {
             board.set(enemy.position(), TileType.PLAYER);
         }
