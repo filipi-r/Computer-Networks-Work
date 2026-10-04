@@ -95,11 +95,16 @@ public class ServerConnection implements Runnable {
                 }
                 break;
             case GAME_OVER:
-                String winner = ((GameOverMessage) message).winner();
-                if (winner.equals(client.getPlayerName())) {
-                    TerminalUI.println("*** VOCÊ VENCEU! ***");
+                GameOverMessage gameOver = (GameOverMessage) message;
+                int winnerIndex = gameOver.winnerIndex();
+                String winnerName = gameOver.winnerName();
+
+                int myIndex = client.getGameState().getMyPlayerIndex();
+
+                if (winnerIndex == myIndex) {
+                    TerminalUI.println("*** VOCÊ VENCEU, " + winnerName + "! ***");
                 } else {
-                    TerminalUI.println("*** Seu barco foi afundado. Vencedor: " + winner + " ***");
+                    TerminalUI.println("*** Seu barco foi afundado. Vencedor: " + winnerName + " ***");
                 }
                 TerminalUI.println("Pressione Enter para sair.");
                 break;
