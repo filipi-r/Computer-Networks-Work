@@ -1,7 +1,5 @@
 package server;
 
-import common.game.BoardView;
-import common.game.TileType;
 import common.protocol.message_types.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,8 @@ public class GameSession {
         WAITING_PLAYERS,
         WAITING_OK,
         SELCTING_POSITION,
-        GAME_RUNNING
+        GAME_RUNNING,
+        GAME_OVER
     }
 
     private final String id;
@@ -50,6 +49,16 @@ public class GameSession {
         }
     }
 
+    public synchronized void processShoot(ClientHandler cliente, ShootMessage shootMsg) {
+        if (gameManager != null) {
+            gameManager.processShoot(cliente, shootMsg);
+        }
+    }
+
+    public synchronized void finishGame() {
+        this.state = SessionState.GAME_OVER;
+    }
+
     public synchronized void checkReadiness() {
         if (state == SessionState.WAITING_OK && isFull() && players.stream().allMatch(ClientHandler::isReady)) {
             this.gameManager = new GameManager(this, new ArrayList<>(players));
@@ -63,7 +72,7 @@ public class GameSession {
         for (ClientHandler j : players) {
             var initialPosition = gameManager.getInitialPosition(j);
             j.send(new GameStartMessage(initialPosition));
-            j.send(new GameStateMessage(new BoardView(initialPosition, new TileType[12][12])));
+            j.send(new GameStateMessage(gameManager.getBoardView(j)));
         }
 
         if (this.gameManager != null) {
@@ -73,7 +82,14 @@ public class GameSession {
 
     public synchronized void removePlayer(ClientHandler client) {
         players.remove(client);
-        sendAll(new ErrorMessage("O outro jogador desconectou. Partida encerrada."));
+
+        // Se a partida já tinha acabado, desconectar depois é normal: não precisa avisar ninguém.
+        if (state != SessionState.GAME_OVER) {
+            if (state == SessionState.GAME_RUNNING) {
+                state = SessionState.GAME_OVER; // quem ficou não pode mais jogar sozinho
+            }
+            sendAll(new ErrorMessage("O outro jogador desconectou. Partida encerrada."));
+        }
 
         if (gameManager != null) {
             gameManager.endMatch();
@@ -93,5 +109,6 @@ public class GameSession {
     public GameManager getGameManager() { return gameManager; }
     public boolean isEmFaseSelecao() { return state == SessionState.SELCTING_POSITION; }
     public boolean isEmJogo() { return state == SessionState.GAME_RUNNING; }
+    public boolean isFinished() { return state == SessionState.GAME_OVER; }
     public SessionState getState() { return state; }
 }

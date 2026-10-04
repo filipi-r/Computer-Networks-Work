@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import common.protocol.message_types.ConnectedMessage;
-
 public class LobbyManager {
     private final Map<String, GameSession> currentSessions = new ConcurrentHashMap<>();
     private GameSession pendingLobby = null;

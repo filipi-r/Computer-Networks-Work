@@ -1,8 +1,11 @@
 package common.game;
 
-/*Class that contains the board details that the player know of.
-Server -> send a board view
-Client -> receives board view*/
-public record BoardView(Position playerPosition, TileType[][] visibleTiles) {
-    
+/*Contrato do que um jogador sabe do tabuleiro.
+Server -> monta um BoardView para cada jogador e envia
+Client -> recebe o BoardView*/
+public interface BoardView {
+    Position playerPosition();
+
+    /** Matriz [linha][coluna] com o que o jogador enxerga (FOG onde ele não vê nada). */
+    TileType[][] visibleTiles();
 }

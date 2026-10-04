@@ -2,7 +2,7 @@ package common.protocol;
 
 import java.util.Arrays;
 
-import common.game.BoardView;
+import common.game.Board;
 import common.game.Direction;
 import common.game.Position;
 import common.game.TileType;
@@ -38,6 +38,10 @@ public class MessageParser {
                     position(data, 0),
                     TileType.valueOf(data[2]));
             case GAME_STATE -> gameState(data);
+            case ROUND -> new RoundMessage(
+                    Integer.parseInt(data[0]),
+                    Boolean.parseBoolean(data[1]),
+                    Boolean.parseBoolean(data[2]));
             case GAME_OVER -> new GameOverMessage(data[0]);
             case ERROR -> new ErrorMessage(data[0]);
             default -> new ErrorMessage("Mensagem Recebida é Invalida");
@@ -72,9 +76,9 @@ public class MessageParser {
         for (int i = 4; i < data.length; i += 3) {
             int x = Integer.parseInt(data[i]);
             int y = Integer.parseInt(data[i + 1]);
-            visibleTiles[y][x] = TileType.valueOf(data[i + 2]);
+            visibleTiles[x][y] = TileType.valueOf(data[i + 2]);
         }
 
-        return new GameStateMessage(new BoardView(playerPosition, visibleTiles));
+        return new GameStateMessage(new Board(playerPosition, visibleTiles));
     }
 }

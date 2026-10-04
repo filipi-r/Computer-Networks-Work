@@ -10,6 +10,12 @@ public class TerminalUI {
 
     private static final Scanner stdin = new Scanner(System.in);
 
+    // Duas threads escrevem no terminal (principal e leitora do servidor). Tudo passa por println(),
+    // que usa esta trava, e promptShown diz se o "> " está na tela esperando o jogador digitar.
+    private static final Object LOCK = new Object();
+    private static final String PROMPT = "> ";
+    private static boolean promptShown = false;
+
     private static final char FOG = '*';
     private static final char WATER = '~';
     private static final char ME = 'B';
@@ -43,7 +49,7 @@ public class TerminalUI {
           .append(ME).append(" você   ")
           .append(ENEMY).append(" inimigo\n");
         
-        System.out.println(board.toString());
+        println(board.toString());
     }
  
     private static char symbol(TileType tile, int x, int y, Position me) {
@@ -59,9 +65,44 @@ public class TerminalUI {
         }
     }
 
+    /**
+     * Escreve uma mensagem de forma segura entre as threads. Se o prompt estiver na tela, ele é apagado
+     * para a mensagem ocupar o lugar dele e é reimpresso DEPOIS dela, então o "> " fica sempre por último.
+     * (Texto já digitado e ainda não enviado com Enter pode ficar visualmente bagunçado.)
+     */
+    public static void println(String text) {
+        synchronized (LOCK) {
+            if (promptShown) System.out.print("\r  \r");
+            System.out.println(text);
+            if (promptShown) System.out.print(PROMPT);
+            System.out.flush();
+        }
+    }
+
+    /** Mostra o prompt e lê um comando já separado em palavras. Retorna null se a entrada acabou. */
     public static String[] getPrompt() {
-        System.out.print("> ");
-        return stdin.nextLine().trim().toLowerCase().split("\\s+");
+        synchronized (LOCK) {
+            System.out.print(PROMPT);
+            System.out.flush();
+            promptShown = true;
+        }
+
+        boolean hasLine = stdin.hasNextLine(); // bloqueia fora da trava, senão a thread leitora travaria junto
+        String line = hasLine ? stdin.nextLine() : null;
+
+        synchronized (LOCK) {
+            promptShown = false; // o Enter do jogador já levou o cursor para a próxima linha
+        }
+        return hasLine ? line.trim().toLowerCase().split("\\s+") : null;
+    }
+
+    /** Pergunta algo e devolve a linha digitada (usa o mesmo Scanner do resto, para não perder entrada). */
+    public static String readLine(String question) {
+        synchronized (LOCK) {
+            System.out.print(question);
+            System.out.flush();
+        }
+        return stdin.hasNextLine() ? stdin.nextLine() : "";
     }
 
     public static boolean hasNextLine() {
@@ -69,15 +110,16 @@ public class TerminalUI {
     }
 
     public static void printHelp() {
-        System.out.println("""
+        println("""
                 Comandos:
                   ok               confirma que está pronto (quando o lobby encher)
                   move <up|down|right|left>   move o barco uma casa (cima, baixo, direita, esquerda)
                   shoot <x> <y>    atira na casa (x = linha, y = coluna)
-                  Cada rodada permite 1 MOVE e 1 SHOOT por jogador.
+                  Os dois jogadores agem ao mesmo tempo. Cada rodada permite 1 MOVE e 1 SHOOT por jogador
+                  e só termina quando os dois usarem as duas ações.
                   board            redesenha o tabuleiro
                   help             mostra os comandos
                   quit             fecha o programa
-                """);
+                """.stripTrailing());
     }
 }

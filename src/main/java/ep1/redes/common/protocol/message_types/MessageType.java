@@ -1,5 +1,7 @@
 package common.protocol.message_types;
 
+
+//o espaço entre os tipos não representa nada (agrupamento ou algo do tipo) eu fiz pq sou maluco
 public enum MessageType {
 
     JOIN,
@@ -16,6 +18,7 @@ public enum MessageType {
     SHOOT_RESULT,
 
     GAME_STATE,
+    ROUND,
     GAME_OVER,
 
     ERROR

@@ -17,7 +17,7 @@ public class ClientHandler implements Runnable {
 
     private GameSession gameSession;
     private boolean ready = false;
-    private String name = "Jogador"; // <-- VARIÁVEL ADICIONADA AQUI
+    private String name = "Jogador";
 
     public ClientHandler(Socket socket, LobbyManager lobbyManager) throws IOException {
         this.socket = socket;
@@ -67,20 +67,26 @@ public class ClientHandler implements Runnable {
             }
             case MOVE -> {
                 if (gameSession.isEmJogo()) {
-                    MoveMessage moveMsg = (MoveMessage) msg;
-                    gameSession.processMovement(this, moveMsg);
+                    gameSession.processMovement(this, (MoveMessage) msg);
                 } else {
-                    send(new ErrorMessage("A partida ainda não começou!"));
+                    sendGameNotRunning();
                 }
             }
             case SHOOT -> {
                 if (gameSession.isEmJogo()) {
-                    ShootMessage shootMsg = (ShootMessage) msg;
-                    // Lógica para processar o tiro via GameManager
+                    gameSession.processShoot(this, (ShootMessage) msg);
+                } else {
+                    sendGameNotRunning();
                 }
             }
             default -> send(new ErrorMessage("Comando não suportado no momento: " + msg.type()));
         }
+    }
+
+
+    //esse ternario foi eu mesmo professor, os da classe TerminalUI pode até n ter sido, mas esse e uns outros ai fui eu mesmo
+    private void sendGameNotRunning() {
+        send(new ErrorMessage(gameSession.isFinished() ? "A partida já terminou." : "A partida ainda não começou!"));
     }
 
     public void send(Message msg) {
