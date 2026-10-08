@@ -17,13 +17,8 @@ import common.protocol.message_types.MoveMessage;
 import common.protocol.message_types.ReadyMessage;
 import common.protocol.message_types.ShootMessage;
 
-/**
- * Duas threads:
- *  - principal: loop de comandos do teclado ({@link #commandLoop()})
- *  - leitora: {@link ServerConnection}, que recebe e mostra o que o servidor manda
- */
 public class Client {
-    private static final String SERVER_IP = "127.0.0.1";
+    private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 58901;
 
     private final Socket socket;

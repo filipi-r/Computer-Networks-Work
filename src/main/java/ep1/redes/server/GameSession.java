@@ -88,7 +88,7 @@ public class GameSession {
             if (state == SessionState.GAME_RUNNING) {
                 state = SessionState.GAME_OVER; // quem ficou não pode mais jogar sozinho
             }
-            sendAll(new ErrorMessage("O outro jogador desconectou. Partida encerrada."));
+            sendAll(new ErrorMessage(ErrorMessage.OPPONENT_DISCONNECTED));
         }
 
         if (gameManager != null) {

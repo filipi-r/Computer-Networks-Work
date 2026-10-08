@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import common.game.TileType;
 import common.protocol.MessageParser;
+import common.protocol.message_types.ErrorMessage;
 import common.protocol.message_types.GameOverMessage;
 import common.protocol.message_types.GameStartMessage;
 import common.protocol.message_types.GameStateMessage;
@@ -104,7 +105,11 @@ public class ServerConnection implements Runnable {
                 TerminalUI.println("Pressione Enter para sair.");
                 break;
             case ERROR:
-                TerminalUI.println("[ERROR] " + message.data()[0]);
+                String error = ((ErrorMessage) message).error();
+                TerminalUI.println("[ERROR] " + error);
+                if (ErrorMessage.OPPONENT_DISCONNECTED.equals(error)) {
+                    client.getGameState().finish();
+                }
                 break;
             default:
                 break;
