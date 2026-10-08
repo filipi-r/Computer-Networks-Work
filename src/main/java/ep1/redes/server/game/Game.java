@@ -5,21 +5,12 @@ import java.util.List;
 import java.util.Random;
 
 import common.game.Board;
-import common.game.BoardView;
 import common.game.Direction;
 import common.game.Position;
 import common.game.TileType;
 
 /**
- * Regras e estado da partida. Não conhece sockets: recebe ações, valida e atualiza o estado.
- * Quem fala com a rede é o GameManager.
- *
- * Como funciona uma rodada:
- *  - Os dois jogadores agem ao mesmo tempo: cada um pode fazer 1 MOVE e 1 SHOOT, em qualquer ordem.
- *  - Cada ação vale na hora em que o servidor a processa (as ações chegam uma de cada vez, na ordem de chegada).
- *  - A rodada só fecha quando OS DOIS usaram as duas ações. Quem termina antes espera o outro.
- *  - A névoa dissipada por um tiro dura REVEAL_ROUNDS rodadas contando a rodada em que o tiro foi dado.
- *    Só quem atirou enxerga a área revelada.
+Garante que as regras serão cumpridas, basicamente verifica se o estado do jogo e as acoes sao validas
  */
 public class Game {
     public static final int ROWS = 10;
@@ -45,9 +36,6 @@ public class Game {
         players[1] = new Player(1, p2);
     }
 
-    // ---------------------------------------------------------------- ações
-
-    /** Move o barco uma casa. Se a casa for a do inimigo, o barco o abalroa e ele morre. */
     public Position move(int playerIndex, Direction dir) throws InvalidActionException {
         Player me = checkCanAct(playerIndex);
         if (me.hasMoved()) {
@@ -62,7 +50,7 @@ public class Game {
         me.moveTo(destination);
         me.markMoved();
 
-        // Recusar o movimento por "casa ocupada" revelaria onde o inimigo está, então abalroar o mata.
+        // mata o inimigo se.
         Player enemy = enemyOf(me);
         if (enemy.position().equals(destination)) {
             enemy.kill();
@@ -73,7 +61,7 @@ public class Game {
         return destination;
     }
 
-    /** Atira em qualquer casa do tabuleiro: dissipa a névoa em cruz e mata o inimigo se ele estiver no centro. */
+    /* Atira em qualquer casa do tabuleiro: revela a cruz para ambos e mata o inimigo se ele estiver no meio*/
     public ShotResult shoot(int playerIndex, Position target) throws InvalidActionException {
         Player me = checkCanAct(playerIndex);
         if (me.hasShot()) {
@@ -85,7 +73,9 @@ public class Game {
         }
 
         me.markShot();
-        me.visibility().reveal(cross(target), REVEAL_ROUNDS);
+        for (Player player : players) {
+            player.visibility().reveal(cross(target), REVEAL_ROUNDS);
+        }
 
         Player enemy = enemyOf(me);
         boolean hit = enemy.position().equals(target);
