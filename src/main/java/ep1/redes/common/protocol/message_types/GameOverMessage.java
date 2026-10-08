@@ -1,6 +1,6 @@
 package common.protocol.message_types;
 
-public record GameOverMessage(String winner) implements Message {
+public record GameOverMessage(int winnerIndex, String winnerName) implements Message {
 
     @Override
     public MessageType type() {
@@ -9,6 +9,6 @@ public record GameOverMessage(String winner) implements Message {
 
     @Override
     public String[] data() {
-        return new String[] { winner };
+        return new String[] { String.valueOf(winnerIndex), winnerName };
     }
 }

@@ -65,14 +65,15 @@ public class GameManager {
         sendBoardViews();
 
         if (game.isOver()) {
-            String winnerName = handlers.get(game.winnerIndex()).getName();
-            System.out.println("[GameManager] Fim de jogo na sala " + session.getId() + ". Vencedor: " + winnerName);
-            session.sendAll(new GameOverMessage(winnerName));
+            int winnerIdx = game.winnerIndex();
+            String winnerName = handlers.get(winnerIdx).getName();
+
+            System.out.println("[GameManager] Fim de jogo na sala " + session.getId() + ". Vencedor: " + winnerName + " (P" + (winnerIdx + 1) + ")");
+
+            session.sendAll(new GameOverMessage(winnerIdx, winnerName));
             session.finishGame();
-        } else if (game.round() != roundBefore) {
-            sendRounds();
         } else {
-            sendRound(actor);
+            sendRounds();
         }
     }
 

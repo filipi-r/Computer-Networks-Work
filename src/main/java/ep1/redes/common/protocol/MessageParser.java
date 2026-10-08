@@ -42,7 +42,7 @@ public class MessageParser {
                     Integer.parseInt(data[0]),
                     Boolean.parseBoolean(data[1]),
                     Boolean.parseBoolean(data[2]));
-            case GAME_OVER -> new GameOverMessage(data[0]);
+            case GAME_OVER -> new GameOverMessage(Integer.parseInt(data[0]), data[1]);
             case ERROR -> new ErrorMessage(data[0]);
             default -> new ErrorMessage("Mensagem Recebida é Invalida");
         };

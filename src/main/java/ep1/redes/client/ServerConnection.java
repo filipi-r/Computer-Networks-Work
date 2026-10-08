@@ -13,6 +13,7 @@ import common.protocol.message_types.Message;
 import common.protocol.message_types.MoveResultMessage;
 import common.protocol.message_types.RoundMessage;
 import common.protocol.message_types.ShootResultMessage;
+import common.game.BoardView;
 
 /**
  * Thread que só LÊ o servidor: atualiza o estado e mostra as mensagens.
@@ -21,6 +22,7 @@ import common.protocol.message_types.ShootResultMessage;
 public class ServerConnection implements Runnable {
     private final BufferedReader in;
     private final Client client;
+    private String lastRoundStatus = "";
 
     public ServerConnection(BufferedReader in, Client client) {
         this.in = in;
@@ -70,7 +72,7 @@ public class ServerConnection implements Runnable {
                 break;
             case GAME_STATE:
                 if (changed) {
-                    TerminalUI.boardRender(((GameStateMessage) message).boardView());
+                    TerminalUI.boardRender(((GameStateMessage) message).boardView(), lastRoundStatus);
                 }
                 break;
             case MOVE_RESULT:
@@ -89,18 +91,28 @@ public class ServerConnection implements Runnable {
             case ROUND:
                 RoundMessage round = (RoundMessage) message;
                 if (round.canMove() || round.canShoot()) {
-                    TerminalUI.println("Rodada " + round.round() + " - disponível: "
-                            + (round.canMove() ? "[move] " : "") + (round.canShoot() ? "[shoot]" : ""));
+                    lastRoundStatus = "Rodada " + round.round() + " - disponível: "
+                            + (round.canMove() ? "[move] " : "") + (round.canShoot() ? "[shoot]" : "");
                 } else {
-                    TerminalUI.println("Rodada " + round.round() + " - você já agiu; aguardando o outro jogador...");
+                    lastRoundStatus = "Rodada " + round.round() + " - você já agiu; aguardando o outro jogador...";
+                }
+
+                BoardView board = client.getGameState().getBoard();
+                if (board != null) {
+                    TerminalUI.boardRender(board, lastRoundStatus);
                 }
                 break;
             case GAME_OVER:
-                String winner = ((GameOverMessage) message).winner();
-                if (winner.equals(client.getPlayerName())) {
-                    TerminalUI.println("*** VOCÊ VENCEU! ***");
+                GameOverMessage gameOver = (GameOverMessage) message;
+                int winnerIndex = gameOver.winnerIndex();
+                String winnerName = gameOver.winnerName();
+
+                int myIndex = client.getGameState().getMyPlayerIndex();
+
+                if (winnerIndex == myIndex) {
+                    TerminalUI.println("*** VOCÊ VENCEU, " + winnerName + "! ***");
                 } else {
-                    TerminalUI.println("*** Seu barco foi afundado. Vencedor: " + winner + " ***");
+                    TerminalUI.println("*** Seu barco foi afundado. Vencedor: " + winnerName + " ***");
                 }
                 TerminalUI.println("Pressione Enter para sair.");
                 break;
