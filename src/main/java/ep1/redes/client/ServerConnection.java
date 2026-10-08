@@ -13,7 +13,6 @@ import common.protocol.message_types.Message;
 import common.protocol.message_types.MoveResultMessage;
 import common.protocol.message_types.RoundMessage;
 import common.protocol.message_types.ShootResultMessage;
-import common.game.BoardView;
 
 /**
  * Thread que só LÊ o servidor: atualiza o estado e mostra as mensagens.
@@ -22,7 +21,7 @@ import common.game.BoardView;
 public class ServerConnection implements Runnable {
     private final BufferedReader in;
     private final Client client;
-    private String lastRoundStatus = "";
+    private String lastRoundStatus;
 
     public ServerConnection(BufferedReader in, Client client) {
         this.in = in;
@@ -72,7 +71,7 @@ public class ServerConnection implements Runnable {
                 break;
             case GAME_STATE:
                 if (changed) {
-                    TerminalUI.boardRender(((GameStateMessage) message).boardView(), lastRoundStatus);
+                    TerminalUI.boardRender(((GameStateMessage) message).boardView());
                 }
                 break;
             case MOVE_RESULT:
@@ -90,16 +89,16 @@ public class ServerConnection implements Runnable {
                 break;
             case ROUND:
                 RoundMessage round = (RoundMessage) message;
+                String roundStatus;
                 if (round.canMove() || round.canShoot()) {
-                    lastRoundStatus = "Rodada " + round.round() + " - disponível: "
+                    roundStatus = "Rodada " + round.round() + " - disponível: "
                             + (round.canMove() ? "[move] " : "") + (round.canShoot() ? "[shoot]" : "");
                 } else {
-                    lastRoundStatus = "Rodada " + round.round() + " - você já agiu; aguardando o outro jogador...";
+                    roundStatus = "Rodada " + round.round() + " - você já agiu; aguardando o outro jogador...";
                 }
-
-                BoardView board = client.getGameState().getBoard();
-                if (board != null) {
-                    TerminalUI.boardRender(board, lastRoundStatus);
+                if (!roundStatus.equals(lastRoundStatus)) {
+                    TerminalUI.println(roundStatus);
+                    lastRoundStatus = roundStatus;
                 }
                 break;
             case GAME_OVER:
