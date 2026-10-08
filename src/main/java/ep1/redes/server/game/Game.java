@@ -73,7 +73,7 @@ public class Game {
         return destination;
     }
 
-    /** Atira em qualquer casa do tabuleiro: dissipa a névoa em cruz e mata o inimigo se ele estiver no centro. */
+    /** Atira em qualquer casa do tabuleiro: dissipa a névoa em cruz para ambos e verifica acertos. */
     public ShotResult shoot(int playerIndex, Position target) throws InvalidActionException {
         Player me = checkCanAct(playerIndex);
         if (me.hasShot()) {
@@ -85,14 +85,27 @@ public class Game {
         }
 
         me.markShot();
-        me.visibility().reveal(cross(target), REVEAL_ROUNDS);
 
+        // Dissipa a névoa da área em cruz para os DOIS jogadores
         Player enemy = enemyOf(me);
-        boolean hit = enemy.position().equals(target);
-        if (hit) {
+        me.visibility().reveal(cross(target), REVEAL_ROUNDS);
+        enemy.visibility().reveal(cross(target), REVEAL_ROUNDS);
+
+        // Verifica acerto no inimigo
+        boolean hitEnemy = enemy.position().equals(target);
+        if (hitEnemy) {
             enemy.kill();
             winner = me;
         }
+
+        // Verifica acerto em si mesmo (auto-tiro)
+        boolean hitSelf = me.position().equals(target);
+        if (hitSelf) {
+            me.kill();
+            winner = enemy;
+        }
+
+        boolean hit = hitEnemy || hitSelf;
 
         afterAction();
         return new ShotResult(target, hit);
@@ -126,6 +139,12 @@ public class Game {
         for (Position cell : me.visibility().revealedCells()) {
             board.set(cell, TileType.WATER);
         }
+
+        // revelado pelo inimigo tb é visivel
+        for (Position cell : enemy.visibility().revealedCells()) {
+            board.set(cell, TileType.WATER);
+        }
+
         if (me.visibility().isRevealed(enemy.position())) {
             board.set(enemy.position(), TileType.PLAYER);
         }

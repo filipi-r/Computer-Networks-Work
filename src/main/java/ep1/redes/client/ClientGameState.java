@@ -6,6 +6,7 @@ import common.game.BoardView;
 import common.protocol.message_types.GameStateMessage;
 import common.protocol.message_types.Message;
 import common.protocol.message_types.RoundMessage;
+import common.protocol.message_types.ConnectedMessage;
 
 /**
  * Estado do jogo do ponto de vista do cliente.
@@ -23,9 +24,12 @@ public class ClientGameState {
 
     private ClientState currentState = ClientState.CONNECTING;
     private BoardView board = null;
+    private int myPlayerIndex = -1;
 
     public synchronized ClientState getState() { return currentState; }
     public synchronized BoardView getBoard() { return board; }
+
+    public synchronized int getMyPlayerIndex() { return myPlayerIndex; }
 
     public synchronized boolean isInGame() {
         return currentState == ClientState.INGAME_PLAYING || currentState == ClientState.INGAME_WAITING;
@@ -44,6 +48,11 @@ public class ClientGameState {
         if (currentState == ClientState.FINISHED) return true;
 
         switch (message.type()) {
+            case CONNECTED:
+                ConnectedMessage conn = (ConnectedMessage) message;
+                // playerNumber vem 1 ou 2; convertemos para índice 0 ou 1
+                this.myPlayerIndex = conn.playerNumber() - 1;
+                break;
             case LOBBY_FULL:
                 this.currentState = ClientState.LOBBY_FULL;
                 break;
