@@ -29,8 +29,6 @@ public class TerminalUI {
 
         StringBuilder board = new StringBuilder();
 
-        board.append("\033[H\033[2J");
-
         board.append("    ");
         for (int x = 0; x < width; x++) {
             board.append(String.format("%2d ", x));

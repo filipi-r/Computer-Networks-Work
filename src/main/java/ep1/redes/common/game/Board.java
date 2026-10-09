@@ -2,9 +2,9 @@ package common.game;
 
 import java.util.Arrays;
 
-/**
- Classe que representa o tabuleiro, o jogador monta ao receber um GAME_STATE e o servidor monta para enviar o GAME_STATE
- */
+/*
+Server -> monta um Board para cada jogador e envia
+Client -> recebe o Board */
 public class Board implements BoardView {
     private final Position playerPosition;
     private final TileType[][] tiles;

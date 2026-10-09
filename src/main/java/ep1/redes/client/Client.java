@@ -52,7 +52,7 @@ public class Client {
     public void send(Message message) {
         out.println(MessageSerializer.serialize(message));
         if(out.checkError()) {
-            TerminalUI.println("[CLIENTE] conexão perdida, encerrando processo...");
+            TerminalUI.println("[CLIENTE] conexão perdida: encerrando processo...");
             gameState.finish();
         }
     }
